@@ -28,6 +28,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <quarkus.version>3.4.1</quarkus.version>
+    <togglz.version>4.4.0</togglz.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -37,6 +38,11 @@
         <version>${quarkus.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.togglz</groupId>
+        <artifactId>togglz-core</artifactId>
+        <version>${togglz.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

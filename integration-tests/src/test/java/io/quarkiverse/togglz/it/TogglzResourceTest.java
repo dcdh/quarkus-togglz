@@ -9,13 +9,30 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 public class TogglzResourceTest {
-
     @Test
-    public void testHelloEndpoint() {
+    public void shouldGetStatus() {
         given()
-                .when().get("/togglz")
+                .when().get("/togglz/FEATURE2")
                 .then()
                 .statusCode(200)
-                .body(is("Hello togglz"));
+                .body(is("true"));
+    }
+
+    @Test
+    public void shouldEnable() {
+        given()
+                .when().post("/togglz/FEATURE1/enable")
+                .then()
+                .statusCode(200)
+                .body(is("true"));
+    }
+
+    @Test
+    public void shouldDisable() {
+        given()
+                .when().post("/togglz/FEATURE1/disable")
+                .then()
+                .statusCode(200)
+                .body(is("false"));
     }
 }
