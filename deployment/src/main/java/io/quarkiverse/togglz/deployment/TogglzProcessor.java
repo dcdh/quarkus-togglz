@@ -8,13 +8,16 @@ import jakarta.inject.Singleton;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 import org.togglz.core.Feature;
 import org.togglz.core.manager.FeatureManager;
-import org.togglz.core.repository.mem.InMemoryStateRepository;
-import org.togglz.core.user.NoOpUserProvider;
+import org.togglz.core.repository.StateRepository;
+import org.togglz.core.user.UserProvider;
 
 import io.quarkiverse.togglz.runtime.FeatureManagerRecorder;
+import io.quarkiverse.togglz.runtime.StateRepositoryRecorder;
+import io.quarkiverse.togglz.runtime.UserProviderRecorder;
 import io.quarkus.arc.deployment.SyntheticBeanBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
@@ -54,17 +57,37 @@ class TogglzProcessor {
 
     @BuildStep
     @Record(ExecutionTime.STATIC_INIT)
+    SyntheticBeanBuildItem produceStateRepositoryResultBuildItem(final StateRepositoryRecorder stateRepositoryRecorder) {
+        return SyntheticBeanBuildItem.configure(StateRepository.class)
+                .scope(Singleton.class)
+                .qualifiers(AnnotationInstance.builder(Default.class).build())
+                .createWith(stateRepositoryRecorder.createStateRepository())
+                .unremovable()
+                .done();
+    }
+
+    @BuildStep
+    @Record(ExecutionTime.STATIC_INIT)
+    SyntheticBeanBuildItem produceUserProviderResultBuildItem(final UserProviderRecorder userProviderRecorder) {
+        return SyntheticBeanBuildItem.configure(UserProvider.class)
+                .scope(Singleton.class)
+                .qualifiers(AnnotationInstance.builder(Default.class).build())
+                .createWith(userProviderRecorder.createUserProvider())
+                .unremovable()
+                .done();
+    }
+
+    @BuildStep
+    @Record(ExecutionTime.STATIC_INIT)
     SyntheticBeanBuildItem produceFeatureManager(final FeatureManagerRecorder featureManagerRecorder,
             final TogglzFeaturesBuildItem togglzFeaturesBuildItem) {
-        // TODO find a way to inject StateRepository and UserProvider
         return SyntheticBeanBuildItem.configure(FeatureManager.class)
                 .scope(Singleton.class)
                 .qualifiers(AnnotationInstance.builder(Default.class).build())
-                .createWith(featureManagerRecorder.createFeatureManager(
-                        togglzFeaturesBuildItem.getFeatures(),
-                        new InMemoryStateRepository(),
-                        new NoOpUserProvider()))
+                .createWith(featureManagerRecorder.createFeatureManager(togglzFeaturesBuildItem.getFeatures()))
                 .unremovable()
+                .addInjectionPoint(ClassType.create(StateRepository.class))
+                .addInjectionPoint(ClassType.create(UserProvider.class))
                 .done();
     }
 }

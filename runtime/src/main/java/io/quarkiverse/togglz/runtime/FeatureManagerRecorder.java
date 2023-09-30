@@ -16,13 +16,11 @@ import io.quarkus.runtime.annotations.Recorder;
 @Recorder
 public class FeatureManagerRecorder {
     public Function<SyntheticCreationalContext<FeatureManager>, FeatureManager> createFeatureManager(
-            final List<Class<? extends Feature>> enumTypes,
-            final StateRepository stateRepository,
-            final UserProvider userProvider) {
+            final List<Class<? extends Feature>> enumTypes) {
         Objects.requireNonNull(enumTypes);
-        Objects.requireNonNull(stateRepository);
-        Objects.requireNonNull(userProvider);
         return (context) -> {
+            final StateRepository stateRepository = context.getInjectedReference(StateRepository.class);
+            final UserProvider userProvider = context.getInjectedReference(UserProvider.class);
             final FeatureManager featureManager = new MultiEnumFeatureTogglzBootstrap(enumTypes, stateRepository, userProvider)
                     .createFeatureManager();
             StaticFeatureManagerProvider.setFeatureManager(featureManager);
