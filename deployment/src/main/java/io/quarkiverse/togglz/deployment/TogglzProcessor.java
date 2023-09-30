@@ -3,10 +3,8 @@ package io.quarkiverse.togglz.deployment;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.inject.Default;
 import jakarta.inject.Singleton;
 
-import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
@@ -60,7 +58,7 @@ class TogglzProcessor {
     SyntheticBeanBuildItem produceStateRepositoryResultBuildItem(final StateRepositoryRecorder stateRepositoryRecorder) {
         return SyntheticBeanBuildItem.configure(StateRepository.class)
                 .scope(Singleton.class)
-                .qualifiers(AnnotationInstance.builder(Default.class).build())
+                .defaultBean()
                 .createWith(stateRepositoryRecorder.createStateRepository())
                 .unremovable()
                 .done();
@@ -71,7 +69,7 @@ class TogglzProcessor {
     SyntheticBeanBuildItem produceUserProviderResultBuildItem(final UserProviderRecorder userProviderRecorder) {
         return SyntheticBeanBuildItem.configure(UserProvider.class)
                 .scope(Singleton.class)
-                .qualifiers(AnnotationInstance.builder(Default.class).build())
+                .defaultBean()
                 .createWith(userProviderRecorder.createUserProvider())
                 .unremovable()
                 .done();
@@ -83,7 +81,7 @@ class TogglzProcessor {
             final TogglzFeaturesBuildItem togglzFeaturesBuildItem) {
         return SyntheticBeanBuildItem.configure(FeatureManager.class)
                 .scope(Singleton.class)
-                .qualifiers(AnnotationInstance.builder(Default.class).build())
+                .defaultBean()
                 .createWith(featureManagerRecorder.createFeatureManager(togglzFeaturesBuildItem.getFeatures()))
                 .unremovable()
                 .addInjectionPoint(ClassType.create(StateRepository.class))
