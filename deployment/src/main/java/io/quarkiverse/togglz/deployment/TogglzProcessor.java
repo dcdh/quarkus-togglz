@@ -3,11 +3,14 @@ package io.quarkiverse.togglz.deployment;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import jakarta.inject.Singleton;
 
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
+import org.jboss.logging.Logger;
 import org.togglz.core.Feature;
 import org.togglz.core.manager.FeatureManager;
 import org.togglz.core.repository.StateRepository;
@@ -17,6 +20,8 @@ import io.quarkiverse.togglz.runtime.FeatureManagerRecorder;
 import io.quarkiverse.togglz.runtime.StateRepositoryRecorder;
 import io.quarkiverse.togglz.runtime.UserProviderRecorder;
 import io.quarkus.arc.deployment.SyntheticBeanBuildItem;
+import io.quarkus.deployment.Capabilities;
+import io.quarkus.deployment.Capability;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.annotations.ExecutionTime;
@@ -26,6 +31,7 @@ import io.quarkus.deployment.builditem.FeatureBuildItem;
 
 class TogglzProcessor {
     private static final String FEATURE = "togglz";
+    private static final Logger LOGGER = Logger.getLogger(TogglzProcessor.class);
 
     @BuildStep
     FeatureBuildItem feature() {
@@ -55,13 +61,26 @@ class TogglzProcessor {
 
     @BuildStep
     @Record(ExecutionTime.STATIC_INIT)
-    SyntheticBeanBuildItem produceStateRepositoryResultBuildItem(final StateRepositoryRecorder stateRepositoryRecorder) {
-        return SyntheticBeanBuildItem.configure(StateRepository.class)
-                .scope(Singleton.class)
-                .defaultBean()
-                .createWith(stateRepositoryRecorder.createStateRepository())
-                .unremovable()
-                .done();
+    SyntheticBeanBuildItem produceStateRepositoryResultBuildItem(final Capabilities capabilities,
+            final StateRepositoryRecorder stateRepositoryRecorder) {
+        if (capabilities.isPresent(Capability.AGROAL)) {
+            LOGGER.infov("Using jdbc datasource state repository");
+            return SyntheticBeanBuildItem.configure(StateRepository.class)
+                    .scope(Singleton.class)
+                    .defaultBean()
+                    .createWith(stateRepositoryRecorder.createJDBCStateRepository())
+                    .addInjectionPoint(ClassType.create(DataSource.class))
+                    .unremovable()
+                    .done();
+        } else {
+            LOGGER.infov("Using in memory state repository");
+            return SyntheticBeanBuildItem.configure(StateRepository.class)
+                    .scope(Singleton.class)
+                    .defaultBean()
+                    .createWith(stateRepositoryRecorder.createInMemoryStateRepository())
+                    .unremovable()
+                    .done();
+        }
     }
 
     @BuildStep
