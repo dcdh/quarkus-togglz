@@ -12,27 +12,11 @@
   <properties>
     <skipITs>true</skipITs>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkiverse.togglz</groupId>
-      <artifactId>quarkus-togglz</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.rest-assured</groupId>
-      <artifactId>rest-assured</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <packaging>pom</packaging>
+  <modules>
+    <module>default</module>
+    <module>jdbc</module>
+  </modules>
   <build>
     <plugins>
       <plugin>

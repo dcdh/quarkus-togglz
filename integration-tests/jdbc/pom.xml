@@ -4,19 +4,26 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.quarkiverse.togglz</groupId>
-    <artifactId>quarkus-togglz-parent</artifactId>
+    <artifactId>quarkus-togglz-integration-tests</artifactId>
     <version>999-SNAPSHOT</version>
   </parent>
-  <artifactId>quarkus-togglz-deployment</artifactId>
-  <name>Quarkus Togglz - Deployment</name>
+  <artifactId>quarkus-togglz-integration-tests-jdbc</artifactId>
+  <name>Quarkus Togglz - Integration Tests using JDBC State Repository</name>
+  <properties>
+    <skipITs>true</skipITs>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-arc-deployment</artifactId>
+      <artifactId>quarkus-resteasy</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-agroal-spi</artifactId>
+      <artifactId>quarkus-agroal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-h2</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkiverse.togglz</groupId>
@@ -25,28 +32,18 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5-internal</artifactId>
+      <artifactId>quarkus-junit5</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.agroal</groupId>
-      <artifactId>agroal-api</artifactId>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-test-h2</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <annotationProcessorPaths>
-            <path>
-              <groupId>io.quarkus</groupId>
-              <artifactId>quarkus-extension-processor</artifactId>
-              <version>${quarkus.version}</version>
-            </path>
-          </annotationProcessorPaths>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>
