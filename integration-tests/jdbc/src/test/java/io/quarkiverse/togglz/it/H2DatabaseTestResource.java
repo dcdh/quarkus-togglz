@@ -8,13 +8,11 @@ import org.h2.tools.Server;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
-public class H2DatabaseTestResource implements QuarkusTestResourceLifecycleManager {
-
+public final class H2DatabaseTestResource implements QuarkusTestResourceLifecycleManager {
     private Server tcpServer;
 
     @Override
     public Map<String, String> start() {
-
         try {
             tcpServer = Server.createTcpServer("-ifNotExists");
             tcpServer.start();
