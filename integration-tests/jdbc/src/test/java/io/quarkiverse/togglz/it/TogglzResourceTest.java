@@ -5,10 +5,11 @@ import static org.hamcrest.Matchers.is;
 
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
-//@QuarkusTestResource(H2DatabaseTestResource.class)
+@QuarkusTestResource(H2DatabaseTestResource.class)
 public class TogglzResourceTest {
     @Test
     public void shouldGetStatus() {
