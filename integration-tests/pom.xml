@@ -16,6 +16,7 @@
   <modules>
     <module>default</module>
     <module>jdbc</module>
+    <module>mongo</module>
   </modules>
   <build>
     <plugins>

@@ -14,10 +14,7 @@ import jakarta.inject.Inject;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.togglz.core.manager.FeatureManager;
 
@@ -31,10 +28,7 @@ public class TogglzPostgresJdbcTest {
     @RegisterExtension
     static final QuarkusUnitTest unitTest = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(BasicFeatures.class)
-                    .addClass(Column.class)
-                    .addClass(ColumnName.class)
-                    .addClass(ColumnType.class)
+                    .addClasses(BasicFeatures.class, Column.class, ColumnName.class, ColumnType.class)
                     .addAsResource(new StringAsset(
                             "quarkus.datasource.db-kind=postgresql\n" +
                                     "quarkus.datasource.jdbc.max-size=16"),
