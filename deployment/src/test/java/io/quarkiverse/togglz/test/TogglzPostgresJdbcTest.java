@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.togglz.core.repository.StateRepository;
+import org.togglz.core.manager.FeatureManager;
 
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.builder.Version;
@@ -31,6 +31,7 @@ public class TogglzPostgresJdbcTest {
     @RegisterExtension
     static final QuarkusUnitTest unitTest = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
+                    .addClass(BasicFeatures.class)
                     .addClass(Column.class)
                     .addClass(ColumnName.class)
                     .addClass(ColumnType.class)
@@ -45,14 +46,8 @@ public class TogglzPostgresJdbcTest {
     @Inject
     AgroalDataSource defaultDataSource;
 
-    // Inject the stateRepository to force his creation and so migration done in JDBCStateRepository constructor.
-    // Regarding the integration tests the migration is done because the bean is Singleton (created when injected) and
-    // created via the FeatureManager injected into the TogglzResource.
-    // To avoid this injection another strategy would be to inject the StateRepository inside a bean having a StartupEvent.
-    // https://quarkus.io/guides/lifecycle#listening-for-startup-and-shutdown-events
-    // https://quarkus.io/guides/lifecycle#startup_annotation
     @Inject
-    StateRepository stateRepository;
+    FeatureManager featureManager;
 
     @Test
     @Order(1)
@@ -93,5 +88,23 @@ public class TogglzPostgresJdbcTest {
                             new Column(ColumnName.STRATEGY_PARAMS, ColumnType.TEXT)),
                     actualColumns);
         }
+    }
+
+    @Test
+    @Order(3)
+    public void shouldEnableFeature() {
+        featureManager.enable(BasicFeatures.FEATURE1);
+        assertAll(
+                () -> assertTrue(featureManager.isActive(BasicFeatures.FEATURE1)),
+                () -> assertTrue(BasicFeatures.FEATURE1.isActive()));
+    }
+
+    @Test
+    @Order(4)
+    public void shouldDisableFeature() {
+        featureManager.disable(BasicFeatures.FEATURE1);
+        assertAll(
+                () -> assertFalse(featureManager.isActive(BasicFeatures.FEATURE1)),
+                () -> assertFalse(BasicFeatures.FEATURE1.isActive()));
     }
 }
