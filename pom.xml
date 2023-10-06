@@ -44,6 +44,12 @@
         <artifactId>togglz-core</artifactId>
         <version>${togglz.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.togglz</groupId>
+        <artifactId>togglz-mongodb</artifactId>
+        <version>${togglz.version}</version>
+        <optional>true</optional>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <build>

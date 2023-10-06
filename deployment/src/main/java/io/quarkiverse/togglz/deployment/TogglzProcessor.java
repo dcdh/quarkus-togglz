@@ -16,9 +16,13 @@ import org.togglz.core.manager.FeatureManager;
 import org.togglz.core.repository.StateRepository;
 import org.togglz.core.user.UserProvider;
 
+import com.mongodb.client.MongoClient;
+
 import io.quarkiverse.togglz.runtime.FeatureManagerRecorder;
+import io.quarkiverse.togglz.runtime.MongoStateRepositoryProducer;
 import io.quarkiverse.togglz.runtime.StateRepositoryRecorder;
 import io.quarkiverse.togglz.runtime.UserProviderRecorder;
+import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.SyntheticBeanBuildItem;
 import io.quarkus.deployment.Capabilities;
 import io.quarkus.deployment.Capability;
@@ -61,25 +65,50 @@ class TogglzProcessor {
 
     @BuildStep
     @Record(ExecutionTime.STATIC_INIT)
-    SyntheticBeanBuildItem produceStateRepositoryResultBuildItem(final Capabilities capabilities,
-            final StateRepositoryRecorder stateRepositoryRecorder) {
+    void produceStateRepositoryResultBuildItem(final Capabilities capabilities,
+            final StateRepositoryRecorder stateRepositoryRecorder,
+            final BuildProducer<SyntheticBeanBuildItem> syntheticBeanBuildItemProducer,
+            final BuildProducer<AdditionalBeanBuildItem> additionalBeanBuildItemProducer) {
         if (capabilities.isPresent(Capability.AGROAL)) {
             LOGGER.infov("Using jdbc datasource state repository");
-            return SyntheticBeanBuildItem.configure(StateRepository.class)
+            syntheticBeanBuildItemProducer.produce(SyntheticBeanBuildItem.configure(StateRepository.class)
                     .scope(Singleton.class)
                     .defaultBean()
                     .createWith(stateRepositoryRecorder.createJDBCStateRepository())
                     .addInjectionPoint(ClassType.create(DataSource.class))
                     .unremovable()
-                    .done();
+                    .done());
+        } else if (capabilities.isPresent(Capability.MONGODB_CLIENT)) {
+            LOGGER.infov("Using mongodb state repository");
+            additionalBeanBuildItemProducer.produce(
+                    AdditionalBeanBuildItem.builder()
+                            .setUnremovable()
+                            .addBeanClasses(MongoStateRepositoryProducer.class)
+                            .build());
+            /**
+             * I cannot declare it this way below because at that time the MongoClient at injection point using the
+             * default Qualifier is not available yet.
+             * It maybe because of the MongoClientRecorder and createBlockingSyntheticBean
+             * having this comment:
+             * // pass the runtime config into the recorder to ensure that the DataSource related beans
+             * // are created after runtime configuration has been set up
+             * The integration tests are failing at startup while the TogglzMongoTest using the @RegisterExtension were working.
+             * syntheticBeanBuildItemProducer.produce(SyntheticBeanBuildItem.configure(StateRepository.class)
+             * .scope(Singleton.class)
+             * .defaultBean()
+             * .createWith(stateRepositoryRecorder.createMongoDBStateRepository())
+             * .addInjectionPoint(ClassType.create(MongoClient.class))
+             * .unremovable()
+             * .done());
+             */
         } else {
             LOGGER.infov("Using in memory state repository");
-            return SyntheticBeanBuildItem.configure(StateRepository.class)
+            syntheticBeanBuildItemProducer.produce(SyntheticBeanBuildItem.configure(StateRepository.class)
                     .scope(Singleton.class)
                     .defaultBean()
                     .createWith(stateRepositoryRecorder.createInMemoryStateRepository())
                     .unremovable()
-                    .done();
+                    .done());
         }
     }
 

@@ -17,8 +17,7 @@ public class TogglzTest {
     @RegisterExtension
     static final QuarkusUnitTest unitTest = new QuarkusUnitTest()
             .setArchiveProducer(() -> ShrinkWrap.create(JavaArchive.class)
-                    .addClass(BasicFeatures.class)
-                    .addClass(ComplexFeatures.class));
+                    .addClasses(BasicFeatures.class, ComplexFeatures.class));
 
     @Inject
     Instance<FeatureManager> featureManagers;
