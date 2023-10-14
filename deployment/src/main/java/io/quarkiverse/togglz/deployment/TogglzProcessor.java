@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import io.quarkus.undertow.deployment.FilterBuildItem;
 import jakarta.inject.Singleton;
 
 import org.jboss.jandex.ClassInfo;
@@ -28,6 +29,7 @@ import io.quarkus.deployment.annotations.ExecutionTime;
 import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.ApplicationIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
+import org.togglz.servlet.TogglzFilter;
 
 class TogglzProcessor {
     private static final String FEATURE = "togglz";
@@ -103,6 +105,22 @@ class TogglzProcessor {
                     .createWith(userProviderRecorder.createNoOpUserProvider())
                     .unremovable()
                     .done();
+        }
+    }
+
+    @BuildStep
+    @Record(ExecutionTime.STATIC_INIT)
+    void registerTogglzFilter(final Capabilities capabilities,
+                              final BuildProducer<FilterBuildItem> filterProducer) {
+        if (capabilities.isPresent(Capability.SERVLET)) {
+            //si je suis servlet je dois register un filter
+            //    TogglzFilter
+            // pour le test cf RolesAllowedServletTestCase dans le projet Quarkus ... je devrais tester qui je suis en fonction de la feature
+            // cf. SmallRyeOpenTracingProcessor
+            final FilterBuildItem filterInfo = FilterBuildItem.builder("togglzFilter", TogglzFilter.class.getName())
+                    .setAsyncSupported(false)
+                    .build();
+            filterProducer.produce(filterInfo);
         }
     }
 
