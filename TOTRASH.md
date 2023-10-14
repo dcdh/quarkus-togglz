@@ -15,3 +15,6 @@ https://github.com/togglz/togglz/blob/master/spring-boot/autoconfigure/pom.xml
 TODO rajouter admin console
 https://www.togglz.org/documentation/admin-console
 utiliser une conf bien spécifique pour gérer
+
+implementer ceci
+https://github.com/togglz/togglz/blob/master/spring-web/src/main/java/org/togglz/spring/web/FeatureInterceptor.java
