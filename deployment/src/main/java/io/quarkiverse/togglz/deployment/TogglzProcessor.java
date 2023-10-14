@@ -1,5 +1,21 @@
 package io.quarkiverse.togglz.deployment;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
+
+import jakarta.inject.Singleton;
+
+import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.ClassType;
+import org.jboss.jandex.DotName;
+import org.jboss.logging.Logger;
+import org.togglz.core.Feature;
+import org.togglz.core.manager.FeatureManager;
+import org.togglz.core.repository.StateRepository;
+import org.togglz.core.user.UserProvider;
+
 import io.quarkiverse.togglz.runtime.FeatureManagerRecorder;
 import io.quarkiverse.togglz.runtime.StateRepositoryRecorder;
 import io.quarkiverse.togglz.runtime.UserProviderRecorder;
@@ -12,19 +28,6 @@ import io.quarkus.deployment.annotations.ExecutionTime;
 import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.ApplicationIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
-import jakarta.inject.Singleton;
-import org.jboss.jandex.ClassInfo;
-import org.jboss.jandex.ClassType;
-import org.jboss.jandex.DotName;
-import org.jboss.logging.Logger;
-import org.togglz.core.Feature;
-import org.togglz.core.manager.FeatureManager;
-import org.togglz.core.repository.StateRepository;
-import org.togglz.core.user.UserProvider;
-
-import javax.sql.DataSource;
-import java.util.List;
-import java.util.stream.Collectors;
 
 class TogglzProcessor {
     private static final String FEATURE = "togglz";
@@ -37,10 +40,10 @@ class TogglzProcessor {
 
     @BuildStep
     void discoverFeatures(final ApplicationIndexBuildItem applicationIndexBuildItem,
-                          final BuildProducer<TogglzFeaturesBuildItem> togglzFeaturesBuildItem) {
+            final BuildProducer<TogglzFeaturesBuildItem> togglzFeaturesBuildItem) {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final List<Class<? extends Feature>> features = applicationIndexBuildItem.getIndex().getAllKnownImplementors(
-                        DotName.createSimple(Feature.class))
+                DotName.createSimple(Feature.class))
                 .stream()
                 .filter(ClassInfo::isEnum)
                 .map(classInfo -> {
@@ -59,7 +62,7 @@ class TogglzProcessor {
     @BuildStep
     @Record(ExecutionTime.STATIC_INIT)
     SyntheticBeanBuildItem produceStateRepositoryResultBuildItem(final Capabilities capabilities,
-                                                                 final StateRepositoryRecorder stateRepositoryRecorder) {
+            final StateRepositoryRecorder stateRepositoryRecorder) {
         if (capabilities.isPresent(Capability.AGROAL)) {
             LOGGER.infov("Using jdbc datasource state repository");
             return SyntheticBeanBuildItem.configure(StateRepository.class)
@@ -83,7 +86,7 @@ class TogglzProcessor {
     @BuildStep
     @Record(ExecutionTime.STATIC_INIT)
     SyntheticBeanBuildItem produceUserProviderResultBuildItem(final Capabilities capabilities,
-                                                              final UserProviderRecorder userProviderRecorder) {
+            final UserProviderRecorder userProviderRecorder) {
         if (capabilities.isPresent(Capability.SERVLET)) {
             LOGGER.infov("Using ServletUserProvider");
             return SyntheticBeanBuildItem.configure(UserProvider.class)
@@ -106,7 +109,7 @@ class TogglzProcessor {
     @BuildStep
     @Record(ExecutionTime.STATIC_INIT)
     SyntheticBeanBuildItem produceFeatureManager(final FeatureManagerRecorder featureManagerRecorder,
-                                                 final TogglzFeaturesBuildItem togglzFeaturesBuildItem) {
+            final TogglzFeaturesBuildItem togglzFeaturesBuildItem) {
         return SyntheticBeanBuildItem.configure(FeatureManager.class)
                 .scope(Singleton.class)
                 .defaultBean()
