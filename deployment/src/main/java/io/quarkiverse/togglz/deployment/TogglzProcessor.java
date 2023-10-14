@@ -117,8 +117,9 @@ class TogglzProcessor {
             //    TogglzFilter
             // pour le test cf RolesAllowedServletTestCase dans le projet Quarkus ... je devrais tester qui je suis en fonction de la feature
             // cf. SmallRyeOpenTracingProcessor
+            // TODO je vais devoir tester en fonction d'une capabilité sur le nom, sur l'ip ... ou autre ...
             final FilterBuildItem filterInfo = FilterBuildItem.builder("togglzFilter", TogglzFilter.class.getName())
-                    .setAsyncSupported(false)
+                    .setAsyncSupported(true)
                     .build();
             filterProducer.produce(filterInfo);
         }
