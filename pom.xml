@@ -49,6 +49,12 @@
         <artifactId>togglz-servlet</artifactId>
         <version>${togglz.version}</version>
       </dependency>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-security-test-utils</artifactId>
+        <version>${quarkus.version}</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <build>
